@@ -6,3 +6,5 @@ A playground to learn about `PASETO`. `PASETO` has 2 types of `purpose`:
 Using 
 - `gin` as the web-server
 - `aidanwoods.dev/go-paseto` for the PASETO implementation
+
+## PASETO PUBLIC
