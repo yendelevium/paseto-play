@@ -21,10 +21,11 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 
-	maker, err := pasetotokens.MakePasetoKeyPair()
+	makerPublic, err := pasetotokens.MakePasetoKeyPair()
 	if err != nil {
 		log.Fatalf("Failed to make key pair for paseto: %v", err)
 	}
+	makerLocal := pasetotokens.MakePasetoLocalKey()
 
 	// Create a Gin router with default middleware (logger and recovery)
 	r := gin.Default()
@@ -33,7 +34,7 @@ func main() {
 	// apiGroup := router.Group("/api")
 	// routes.AddRoutes(apiGroup, maker)
 	// But directly under / is also fine
-	routes.AddRoutes(&r.RouterGroup, maker)
+	routes.AddRoutes(&r.RouterGroup, makerPublic, makerLocal)
 
 	// Start server on port 8080 (default)
 	if err := r.Run(); err != nil {

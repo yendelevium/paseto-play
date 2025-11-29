@@ -1,4 +1,4 @@
-package pasetotokens
+package auth
 
 import (
 	"fmt"

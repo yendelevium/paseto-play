@@ -5,6 +5,7 @@ import (
 	pasetotokens "github.com/yendelevium/paseto-play/internal/auth"
 )
 
-func AddRoutes(superRoute *gin.RouterGroup, maker *pasetotokens.PasetoPublicKeyPair) {
-	AsymmetricRoutes(superRoute, maker)
+func AddRoutes(superRoute *gin.RouterGroup, makerPublic *pasetotokens.PasetoPublicKeyPair, makerLocal *pasetotokens.PasetoLocalKey) {
+	AsymmetricRoutes(superRoute, makerPublic)
+	SymmetricRoutes(superRoute, makerLocal)
 }

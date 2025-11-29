@@ -1,4 +1,4 @@
-package pasetotokens
+package auth
 
 import (
 	"aidanwoods.dev/go-paseto"
@@ -8,4 +8,8 @@ import (
 type PasetoPublicKeyPair struct {
 	privateKey paseto.V4AsymmetricSecretKey
 	publicKey  paseto.V4AsymmetricPublicKey
+}
+
+type PasetoLocalKey struct {
+	localKey paseto.V4SymmetricKey
 }

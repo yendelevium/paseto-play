@@ -9,13 +9,13 @@ import (
 	pasetotokens "github.com/yendelevium/paseto-play/internal/auth"
 )
 
-func AsymmetricRoutes(superRoute *gin.RouterGroup, maker *pasetotokens.PasetoPublicKeyPair) {
-	r := superRoute.Group("/public")
+func SymmetricRoutes(superRoute *gin.RouterGroup, maker *pasetotokens.PasetoLocalKey) {
+	r := superRoute.Group("/local")
 	{
-		// Define a simple GET endpoint to sign a constant payload
-		r.GET("/sign", func(c *gin.Context) {
+		// Define a simple GET endpoint to encrypt a constant payload
+		r.GET("/encrypt", func(c *gin.Context) {
 			// Return JSON response
-			generated_paseto, err := maker.CreateToken(
+			generated_paseto, err := maker.CreateTokenEncrypted(
 				struct {
 					Name       string
 					Enrollment int
@@ -29,15 +29,15 @@ func AsymmetricRoutes(superRoute *gin.RouterGroup, maker *pasetotokens.PasetoPub
 				})
 				return
 			}
-			c.SetCookie("paseto-public", generated_paseto, 3600, "/", "localhost", false, true)
+			c.SetCookie("paseto-local", generated_paseto, 3600, "/", "localhost", false, true)
 			c.JSON(http.StatusOK, gin.H{
 				"message": "pong",
 			})
 		})
 
-		// Define another GET endpoint to verify and get the payload in the paseto token
-		r.GET("/verify", func(c *gin.Context) {
-			paseto_token, err := c.Cookie("paseto-public")
+		// Define another GET endpoint to decrypt and get the payload in the paseto token
+		r.GET("/decrypt", func(c *gin.Context) {
+			paseto_token, err := c.Cookie("paseto-local")
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{
 					"error": "couldn't get paseto token",
@@ -45,7 +45,7 @@ func AsymmetricRoutes(superRoute *gin.RouterGroup, maker *pasetotokens.PasetoPub
 				return
 			}
 
-			payload, err := maker.VerifyToken(paseto_token)
+			payload, err := maker.DecryptToken(paseto_token)
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{
 					"error": "couldn't parse paseto token",
