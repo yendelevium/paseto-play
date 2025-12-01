@@ -36,7 +36,7 @@ func CheckPublicKeyPairExists() (*PasetoPublicKeyPair, error) {
 }
 
 // The function to generate the key pair
-// Always generates the same key-pair as long as we don't delete the .rsa files
+// Always uses the same key-pair as long as we don't delete the .rsa files
 func MakePasetoKeyPair() (*PasetoPublicKeyPair, error) {
 	// If the keypair exists, use those otherwise generate new (all tokens with previous keypair will be invalidated in that case)
 	keyPair, err := CheckPublicKeyPairExists()
