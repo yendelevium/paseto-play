@@ -1,2 +1,5 @@
 .env
 paseto_play
+
+*.rsa
+*.key

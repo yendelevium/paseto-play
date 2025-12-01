@@ -2,22 +2,65 @@ package auth
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"time"
 
 	"aidanwoods.dev/go-paseto"
 )
 
-// The function to generate the key pair
-// Always generates the same key-pair as we have the same secret
-func MakePasetoKeyPair() (*PasetoPublicKeyPair, error) {
-	secret := os.Getenv("SECRET_PASETO")
-	privateKey, err := paseto.NewV4AsymmetricSecretKeyFromHex(secret)
+// If there's an existing asymmetric key-pair, we read the key-pair from the files and use them
+func CheckPublicKeyPairExists() (*PasetoPublicKeyPair, error) {
+	readPrivateKey, err := os.ReadFile("public.rsa")
 	if err != nil {
-		return nil, fmt.Errorf("failed to generate private key: %w", err)
+		return nil, fmt.Errorf("Failed to read privateKey from system, does public.rsa exist? %w", err)
+	}
+	privateKey, err := paseto.NewV4AsymmetricSecretKeyFromBytes(readPrivateKey)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to generate private key from public.rsa: %w", err)
 	}
 
+	readPublicKey, err := os.ReadFile("public.pub.rsa")
+	if err != nil {
+		return nil, fmt.Errorf("Failed to read publicKey from system, does public.rsa exist? %w", err)
+	}
+	publicKey, err := paseto.NewV4AsymmetricPublicKeyFromBytes(readPublicKey)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to generate public key from public.pub.rsa: %w", err)
+	}
+
+	return &PasetoPublicKeyPair{
+		privateKey,
+		publicKey,
+	}, nil
+}
+
+// The function to generate the key pair
+// Always generates the same key-pair as long as we don't delete the .rsa files
+func MakePasetoKeyPair() (*PasetoPublicKeyPair, error) {
+	// If the keypair exists, use those otherwise generate new (all tokens with previous keypair will be invalidated in that case)
+	keyPair, err := CheckPublicKeyPairExists()
+	if err == nil {
+		log.Println("Using existing key-pair for public paseto :)")
+		return keyPair, nil
+	}
+
+	privateKey := paseto.NewV4AsymmetricSecretKey()
 	publicKey := privateKey.Public()
+
+	// Writing them in files to persist the keys
+	// Read-Write access of file ONLY TO OWNER as it's the private key
+	err = os.WriteFile("public.rsa", privateKey.ExportBytes(), 0600)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to write privateKey to file: %w", err)
+	}
+	// Public key others can read but only owner can write
+	err = os.WriteFile("public.pub.rsa", publicKey.ExportBytes(), 0644)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to write publicKey to file: %w", err)
+	}
+
+	log.Println("Generated key-pair for public paseto :)")
 	return &PasetoPublicKeyPair{
 		privateKey,
 		publicKey,

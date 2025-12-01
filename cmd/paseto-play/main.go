@@ -11,6 +11,7 @@ import (
 )
 
 // This runs BEFORE main
+// Even though there's no env I'm reading I wanted to put this for code-structure
 func init() {
 	config.LoadEnv()
 }
@@ -25,7 +26,11 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to make key pair for paseto: %v", err)
 	}
-	makerLocal := pasetotokens.MakePasetoLocalKey()
+
+	makerLocal, err := pasetotokens.MakePasetoLocalKey()
+	if err != nil {
+		log.Fatalf("Failed to make local key for paseto: %v", err)
+	}
 
 	// Create a Gin router with default middleware (logger and recovery)
 	r := gin.Default()
